@@ -15,37 +15,80 @@ def printBoard(matriz):
     print(top)
     print(" ")
     
-def countsplacedif(m, valeu):  #contar quantos espços estão ocupados em cada coluna
+def countsplacedif(m, valeu):  # contar quantos espços estão ocupados em cada coluna
     count = 0
-    for i in range(0,7):
-        if (m[valeu-1][i] != ' '):
+    for i in range(0, 6):
+        if (m[valeu - 1][i] != ' '):
             count += 1
     return count
 
-def checkWin(piece,matriz):   #verificar se há vitória
-    # Horizontal checker
-    for j in range(0,6):
-        for i in range(3,7):
-            if (matriz[j][i]==matriz[j][i-1]==matriz[j][i-2]==matriz[j][i-3]==piece):
+def checkWin(piece,matriz):   # verificar se há vitória
+
+    for i in range(0, 6): # horizontal 
+        for j in range(3, 7):
+            if (matriz[i][j] == matriz[i][j - 1] == matriz[i][j - 2] == matriz[i][j - 3] == piece):
                     return True
-            else:
-                continue   
-    # Vertical checker
-    for i in range(0,7):
-        for j in range(3,6):
-            if (matriz[j][i]==matriz[j-1][i]==matriz[j-2][i]==matriz[j-3][i]==piece):
+            
+    for j in range(0,7): # vertical 
+        for i in range(3, 6):
+            if (matriz[i][j] == matriz[i - 1][j] == matriz[i - 2][j] == matriz[i - 3][j] == piece):
                     return True
-            else:
-                continue
-    # Diagonal checker
+            
+    # diagonal
     for i in range(0,4):
-        for j in range(0,3):
-            if (matriz[j][i]==matriz[j+1][i+1]==matriz[j+2][i+2]==matriz[j+3][i+3]==piece or
-                matriz[j+3][i]==matriz[j+2][i+1]==matriz[j+1][i+2]==matriz[j][i+3]==piece):
+        for j in range(0, 3):
+            if (matriz[j][i] == matriz[j + 1][i + 1] == matriz[j + 2][i + 2] == matriz[j + 3][i + 3] == piece or
+                matriz[j + 3][i] == matriz[j + 2][i + 1] == matriz[j + 1][i + 2] == matriz[j][i + 3] == piece):
                     return True
-            else:
-                continue
+            
     return False
+
+def check_subset_pontuation(count_O, count_X): # verificar a pontuação de cada sub-conjunto
+    pontuation = 0
+    if count_O == 3 and count_X == 0:
+        pontuation -= 50
+    elif count_X == 3 and count_O == 0:
+        pontuation += 50
+    elif count_O == 2 and count_X == 0:
+        pontuation -= 10
+    elif count_X == 2 and count_O == 0:
+        pontuation += 10
+    elif count_O == 1 and count_X == 0:
+        pontuation -= 1 
+    elif count_X == 1 and count_O == 0:
+        pontuation += 1
+    return pontuation
+
+def utilidade(m):
+    pountuation = 0
+    # verificar vertical
+    for j in range(7):
+        for i in range(3):
+            count_O = 0
+            count_X = 0
+            for k in range(i, i + 4):
+                if (m[j][k] == 'X'):
+                    count_X += 1
+                elif (m[j][k] == 'O'):
+                    count_O += 1
+            pountuation += check_subset_pontuation(count_O, count_X)
+
+    # verificar horizontal 
+    for i in range(6):
+        for j in range(4):
+            count_O = 0
+            count_X = 0
+            for k in range(j, j + 4):
+                if m[k][i] == 'X':
+                    count_X += 1
+                elif m[k][i] == 'O':
+                    count_O += 1
+            pountuation += check_subset_pontuation(count_O, count_X)
+
+    # verificar diagonal
+
+    return pountuation
+            
 
 def playerinput(piece, matriz):
     Set0 = { 1,2,3,4,5,6,7}
@@ -97,16 +140,18 @@ def main():
             m = playerinput(playPiece,m)
             print("Player")
             printBoard(m)
+            print(utilidade(m))
 
         else:
             m= Computermove(playPiece,m)
             print("Computer")
             printBoard(m)
+            print(utilidade(m))
         
         if checkWin(playPiece,m):
             print("Good Game: " + playPiece +  " win's")
             return
- 
+        
         if playPiece == 'X':
             playPiece = 'O'
 
@@ -115,68 +160,3 @@ def main():
 
 main()
 
-
-
-'''
-import numpy as np
-
-def create_board():
-    board = np.zeros((6,7))
-    print(board)
-
-def drop_piece(board, row, col, piece):
-    board[row][col] = piece
-
-def is_valid_location(board, col):
-    return board[5][col] == 0
-
-def get_next_open_row(board, col):
-    for r in range(6):
-        if board[r][col] == 0:
-            return r
-
-def print_board(board):
-    board = np.flip(board, 0)
-    print(board)
-
-def winning_move(board, piece):
-    return True
-
-def play_game():
-    board = create_board()
-    print_board(board)
-    game_over = False
-    turn = 0
-
-    while not game_over:
-        # Ask for Player 1 input
-        if turn == 0:
-            col = int(input("Player 1 make your selection (1-7): ")) - 1
-
-            if is_valid_location(board, col):
-                row = get_next_open_row(board, col)
-                drop_piece(board, row, col, 1)
-
-                if winning_move(board, 1):
-                    print("Player 1 wins!")
-                    game_over = True
-
-        # Ask for Player 2 input
-        else:
-            col = int(input("Player 2 make your selection (1-7): ")) - 1
-
-            if is_valid_location(board, col):
-                row = get_next_open_row(board, col)
-                drop_piece(board, row, col, 2)
-
-                if winning_move(board, 2):
-                    print("Player 2 wins!")
-                    game_over = True
-
-        print_board(board)
-
-        turn += 1
-        turn = turn % 2
-
-play_game()
-'''
