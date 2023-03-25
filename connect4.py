@@ -5,19 +5,19 @@ LINHA = 6
 
 def printBoard(matriz):
     top = '    1   2   3   4   5   6   7   '
-    
+
     for j in range(0,6):
-        string = "   "   
-        j1 = 5 -j
+        string = "   "
+        j1 = 5 - j
         for i in range(0,7):
             if(matriz[i][j1] != " "):
-                string += " " + matriz[i][j1] +"  "
+                string += " " + matriz[i][j1] + "  "
             else:
                 string += ' -  '
-        print(string) 
+        print(string)
     print(top)
     print(" ")
-    
+
 def countsplacedif(m, valeu):  # contar quantos espços estão ocupados em cada coluna
     count = 0
     for i in range(0, 6):
@@ -26,24 +26,23 @@ def countsplacedif(m, valeu):  # contar quantos espços estão ocupados em cada 
     return count
 
 def checkWin(piece,matriz):   # verificar se há vitória
-
-    for i in range(0, 6): # horizontal 
+    for i in range(0, 6):     # horizontal
         for j in range(3, 7):
             if (matriz[i][j] == matriz[i][j - 1] == matriz[i][j - 2] == matriz[i][j - 3] == piece):
                     return True
-            
-    for j in range(0,7): # vertical 
+
+    for j in range(0,7): # vertical
         for i in range(3, 6):
             if (matriz[i][j] == matriz[i - 1][j] == matriz[i - 2][j] == matriz[i - 3][j] == piece):
                     return True
-            
+
     # diagonal
     for i in range(0,4):
         for j in range(0, 3):
             if (matriz[j][i] == matriz[j + 1][i + 1] == matriz[j + 2][i + 2] == matriz[j + 3][i + 3] == piece or
                 matriz[j + 3][i] == matriz[j + 2][i + 1] == matriz[j + 1][i + 2] == matriz[j][i + 3] == piece):
                     return True
-            
+
     return False
 
 def check_subset_pontuation(count_O, count_X): # verificar a pontuação de cada sub-conjunto
@@ -57,7 +56,7 @@ def check_subset_pontuation(count_O, count_X): # verificar a pontuação de cada
     elif count_X == 2 and count_O == 0:
         pontuation += 10
     elif count_O == 1 and count_X == 0:
-        pontuation -= 1 
+        pontuation -= 1
     elif count_X == 1 and count_O == 0:
         pontuation += 1
     return pontuation
@@ -76,7 +75,7 @@ def utilidade(m):
                     count_O += 1
             pountuation += check_subset_pontuation(count_O, count_X)
 
-    # verificar horizontal 
+    # verificar horizontal
     for i in range(6):
         for j in range(4):
             count_O = 0
@@ -112,7 +111,7 @@ def utilidade(m):
             pountuation += check_subset_pontuation(count_O, count_X)
 
     return pountuation
-            
+
 
 def playerinput(piece, matriz):
     Set0 = { 1,2,3,4,5,6,7}
@@ -125,39 +124,38 @@ def playerinput(piece, matriz):
         if difspace >= 6:
             print('Column full, try again...')
             playerinput(piece, matriz)
-            
+
         else:
-            matriz[pos-1][difspace] = piece   
+            matriz[pos-1][difspace] = piece
     return matriz
 
-def Computermove(piece, matriz): #escolha random do computador
+def Computermove(piece, matriz): # escolha random do computador
     pos = randint(1,7)
     difspace = countsplacedif(matriz, pos)
     if difspace >= 6:
-        Computermove(piece, matriz)   
+        Computermove(piece, matriz)
     else:
-        matriz[pos-1][difspace] = piece
+        matriz[pos - 1][difspace] = piece
 
     return matriz
 
 
 def main():
-
     while True:
         player = str( input('Choose X or O: ') )
         if player == 'X' or player == 'O':
             break
-    
+
     playPiece = 'X'
 
     m = [[" "," "," "," "," "," "," "],[" "," "," "," "," "," "," "],[" "," "," "," "," "," "," "],[" "," "," "," "," "," "," "]\
          ,[" "," "," "," "," "," "," "],[" "," "," "," "," "," "," "],[" "," "," "," "," "," "," "]]
-    
+
     count = 0
 
     printBoard(m)
 
-    while count < 42: #se chegar às 42 jogadas e ainda não tiver ocorrido uma vitória, declara-se empate
+    while count < 42: # se chegar às 42 jogadas e ainda não tiver ocorrido uma vitória, declara-se empate
         count += 1
 
         if playPiece == player:
@@ -167,15 +165,15 @@ def main():
             print(utilidade(m))
 
         else:
-            m= Computermove(playPiece,m)
+            m = Computermove(playPiece,m)
             print("Computer")
             printBoard(m)
             print(utilidade(m))
-        
+
         if checkWin(playPiece,m):
             print("Good Game: " + playPiece +  " win's")
             return
-        
+
         if playPiece == 'X':
             playPiece = 'O'
 
@@ -183,4 +181,3 @@ def main():
             playPiece = 'X'
 
 main()
-
