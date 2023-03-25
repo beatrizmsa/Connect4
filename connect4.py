@@ -62,7 +62,7 @@ def check_subset_pontuation(count_O, count_X): # verificar a pontuação de cada
     return pontuation
 
 def utilidade(m):
-    pountuation = 0
+    pontuation = 0
     # verificar vertical
     for j in range(7):
         for i in range(3):
@@ -73,7 +73,7 @@ def utilidade(m):
                     count_X += 1
                 elif (m[j][k] == 'O'):
                     count_O += 1
-            pountuation += check_subset_pontuation(count_O, count_X)
+            pontuation += check_subset_pontuation(count_O, count_X)
 
     # verificar horizontal
     for i in range(6):
@@ -85,7 +85,7 @@ def utilidade(m):
                     count_X += 1
                 elif m[k][i] == 'O':
                     count_O += 1
-            pountuation += check_subset_pontuation(count_O, count_X)
+            pontuation += check_subset_pontuation(count_O, count_X)
 
     # verificar diagonal
     for j in range(0,4):
@@ -97,7 +97,7 @@ def utilidade(m):
                     count_X +=1
                 elif m[j + k][i + k] == 'O':
                     count_O += 1
-            pountuation += check_subset_pontuation(count_O, count_X)
+            pontuation += check_subset_pontuation(count_O, count_X)
 
     for j in range(3,7):
         for i in range(0, 3):
@@ -108,9 +108,9 @@ def utilidade(m):
                     count_X +=1
                 elif m[j - k][i + k] == 'O':
                     count_O += 1
-            pountuation += check_subset_pontuation(count_O, count_X)
+            pontuation += check_subset_pontuation(count_O, count_X)
 
-    return pountuation
+    return pontuation
 
 
 def playerinput(piece, matriz):
