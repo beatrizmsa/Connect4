@@ -1,5 +1,8 @@
 from random import randint
 
+COLUNA = 7
+LINHA = 6
+
 def printBoard(matriz):
     top = '    1   2   3   4   5   6   7   '
     
@@ -86,6 +89,27 @@ def utilidade(m):
             pountuation += check_subset_pontuation(count_O, count_X)
 
     # verificar diagonal
+    for j in range(0,4):
+        for i in range(0, 3):
+            count_O = 0
+            count_X = 0
+            for k in range(0,4):
+                if m[j + k][i + k] == 'X':
+                    count_X +=1
+                elif m[j + k][i + k] == 'O':
+                    count_O += 1
+            pountuation += check_subset_pontuation(count_O, count_X)
+
+    for j in range(3,7):
+        for i in range(0, 3):
+            count_O = 0
+            count_X = 0
+            for k in range(0,4):
+                if m[j - k][i + k] == 'X':
+                    count_X +=1
+                elif m[j - k][i + k] == 'O':
+                    count_O += 1
+            pountuation += check_subset_pontuation(count_O, count_X)
 
     return pountuation
             
