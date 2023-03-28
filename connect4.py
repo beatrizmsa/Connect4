@@ -1,15 +1,15 @@
 from random import randint
 
-COLUNA = 7
-LINHA = 6
+ROW_COUNT = 7
+COLUMN_COUNT = 6
 
 def printBoard(matriz):
     top = '    1   2   3   4   5   6   7   '
 
-    for j in range(0,6):
+    for j in range(0,COLUMN_COUNT):
         string = "   "
         j1 = 5 - j
-        for i in range(0,7):
+        for i in range(0,ROW_COUNT):
             if(matriz[i][j1] != " "):
                 string += " " + matriz[i][j1] + "  "
             else:
@@ -18,21 +18,21 @@ def printBoard(matriz):
     print(top)
     print(" ")
 
-def countsplacedif(m, valeu):  # contar quantos espços estão ocupados em cada coluna
+def countsplacedif(m, value):  # contar quantos espços estão ocupados em cada coluna
     count = 0
     for i in range(0, 6):
-        if (m[valeu - 1][i] != ' '):
+        if (m[value - 1][i] != ' '):
             count += 1
     return count
 
 def checkWin(piece,matriz):   # verificar se há vitória
-    for i in range(0, 6):     # horizontal
-        for j in range(3, 7):
+    for j in range(3,COLUMN_COUNT):     # horizontal
+        for i in range(ROW_COUNT):
             if (matriz[i][j] == matriz[i][j - 1] == matriz[i][j - 2] == matriz[i][j - 3] == piece):
                     return True
 
-    for j in range(0,7): # vertical
-        for i in range(3, 6):
+    for j in range(COLUMN_COUNT): # vertical
+        for i in range(3, ROW_COUNT):
             if (matriz[i][j] == matriz[i - 1][j] == matriz[i - 2][j] == matriz[i - 3][j] == piece):
                     return True
 
@@ -61,7 +61,7 @@ def check_subset_pontuation(count_O, count_X): # verificar a pontuação de cada
         pontuation += 1
     return pontuation
 
-def utilidade(m):
+def utilidade(m): # m é a arvore
     pontuation = 0
     # verificar vertical
     for j in range(7):
@@ -122,7 +122,7 @@ def playerinput(piece, matriz):
     else:
         difspace = countsplacedif(matriz, pos)
         if difspace >= 6:
-            print('Column full, try again...')
+            print('Column full, try again.')
             playerinput(piece, matriz)
 
         else:
@@ -148,8 +148,8 @@ def main():
 
     playPiece = 'X'
 
-    m = [[" "," "," "," "," "," "," "],[" "," "," "," "," "," "," "],[" "," "," "," "," "," "," "],[" "," "," "," "," "," "," "]\
-         ,[" "," "," "," "," "," "," "],[" "," "," "," "," "," "," "],[" "," "," "," "," "," "," "]]
+    m = [[" "," "," "," "," "," "],[" "," "," "," "," "," "],[" "," "," "," "," "," "],[" "," "," "," "," "," "],
+         [" "," "," "," "," "," "],[" "," "," "," "," "," "],[" "," "," "," "," "," "]]
 
     count = 0
 
