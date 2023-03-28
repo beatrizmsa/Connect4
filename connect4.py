@@ -1,7 +1,23 @@
 from random import randint
+import copy
 
 ROW_COUNT = 7
 COLUMN_COUNT = 6
+PIECE_PLAYER = 'X'
+PIECE_COMPUTER = 'O'
+
+
+
+def sucessores(board, piece): #board é o tabuleiro atual sem a jogada resultante do computador
+    sucessores = [] # guardar todos os sucessores do nó atual
+    for i in range(ROW_COUNT):
+        newboard = copy.copy(board)  # copiar o nó atual e gerar todos os seus sucessores
+        m = countsplacedif(board,i) # contar a quantidade de espaços em branco em cada coluna i
+        if m != COLUMN_COUNT:
+            newboard[i][m] = piece 
+            sucessores.append(newboard)
+    return sucessores
+
 
 def printBoard(matriz):
     top = '    1   2   3   4   5   6   7   '
@@ -64,7 +80,7 @@ def check_subset_pontuation(count_O, count_X): # verificar a pontuação de cada
 def utilidade(m): # m é a arvore
     pontuation = 0
     # verificar vertical
-    for j in range(7):
+    for j in range(ROW_COUNT):
         for i in range(3):
             count_O = 0
             count_X = 0
@@ -76,8 +92,8 @@ def utilidade(m): # m é a arvore
             pontuation += check_subset_pontuation(count_O, count_X)
 
     # verificar horizontal
-    for i in range(6):
-        for j in range(4):
+    for i in range(COLUMN_COUNT):
+        for j in range(ROW_COUNT-3):
             count_O = 0
             count_X = 0
             for k in range(j, j + 4):
@@ -88,8 +104,8 @@ def utilidade(m): # m é a arvore
             pontuation += check_subset_pontuation(count_O, count_X)
 
     # verificar diagonal
-    for j in range(0,4):
-        for i in range(0, 3):
+    for j in range(ROW_COUNT-4):
+        for i in range(0,3):
             count_O = 0
             count_X = 0
             for k in range(0,4):
@@ -99,7 +115,7 @@ def utilidade(m): # m é a arvore
                     count_O += 1
             pontuation += check_subset_pontuation(count_O, count_X)
 
-    for j in range(3,7):
+    for j in range(3,ROW_COUNT):
         for i in range(0, 3):
             count_O = 0
             count_X = 0
@@ -162,8 +178,7 @@ def main():
             m = playerinput(playPiece,m)
             print("Player")
             printBoard(m)
-            print(utilidade(m))
-
+            print(sucessores(m,playPiece))
         else:
             m = Computermove(playPiece,m)
             print("Computer")
