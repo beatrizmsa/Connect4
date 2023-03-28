@@ -37,8 +37,8 @@ def checkWin(piece,matriz):   # verificar se há vitória
                     return True
 
     # diagonal
-    for i in range(0,4):
-        for j in range(0, 3):
+    for i in range(0,3):
+        for j in range(0, 4):
             if (matriz[j][i] == matriz[j + 1][i + 1] == matriz[j + 2][i + 2] == matriz[j + 3][i + 3] == piece or
                 matriz[j + 3][i] == matriz[j + 2][i + 1] == matriz[j + 1][i + 2] == matriz[j][i + 3] == piece):
                     return True
