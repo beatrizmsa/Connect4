@@ -1,4 +1,3 @@
-
 from utility import utility
 import copy
 
@@ -27,8 +26,9 @@ def count_pieces(board, value):               # contar quantos espaços estão o
     count = 0
 
     for i in range(0, 6):
-        if (board[value][i] != ' '): #
-            count += 1
+        if board is not None:
+            if (board[value][i] != ' '):
+                count += 1
     return count                              # retorna a quantidade de peças que estão numa coluna
 
 
@@ -61,20 +61,36 @@ def computer_move(piece, board):              # escolha random do computador
 
     return board
 '''
+
 def computer_move(board):
-    _,col = minimax(board, 3, True)
+    _, col = minimax(board, 3, True)
     occupped_pieces = count_pieces(board, col)
     board[col][occupped_pieces] = COMPUTER_PIECE
     return board
 
 
-def successors(board,depth):     # board é o tabuleiro atual sem a jogada resultante do computador
+def full_column(game, column):
+    for i in range(6):
+        if game[i][column] == "-":
+            return False
+    return True
+
+def move(game, column, piece):
+    if column < 0 or column > 6 or full_column(game, column):
+        return game, False
+
+    for i in range(5, -1, -1):
+        if game[i][column] == "-":
+            game[i][column] = piece
+            return game, True
+
+def successors(board, depth):     # board é o tabuleiro atual sem a jogada resultante do computador
         successors = []    # guardar todos os successores do nó atual
         for i in range(COLUMN_COUNT):
             newboard = copy.deepcopy(board)              # copiar o nó atual e gerar todos os seus successores
             occuped_pieces = count_pieces(board, i)      # contar a quantidade de espaços ocupados em cada coluna do tabuleiro (i) e colocamos a peça na linha correspondente a esse valor
             if occuped_pieces != ROW_COUNT:              # só se coloca um peça nessa coluna se a mesma não estiver totalmente ocupada
-                if depth % 2 != 0:
+                if depth % 2 == 0:
                     newboard[i][occuped_pieces] = PLAYER_PIECE
                     successors.append(newboard)
                 else:
@@ -85,13 +101,13 @@ def successors(board,depth):     # board é o tabuleiro atual sem a jogada resul
         return successors
 
 def minimax(node, depth, maximizingPlayer):
-    best_col = 0
-    i = 0
 
-    if depth == 0:         # definir uma função para verificar se o no atual é folha da árvore
+    if depth == 0:                   # definir uma função para verificar se o nó atual é folha da árvore
         return utility(node), None
     if maximizingPlayer:
         best_cost = float('-inf')
+        best_col = 0
+        i = 0
         for child in successors(node, depth):
             if child != None:
                 cost, _ = minimax(child, depth - 1, False)
@@ -102,10 +118,12 @@ def minimax(node, depth, maximizingPlayer):
         return best_cost, best_col
     else:
         best_cost = float('+inf')
+        best_col = 0
+        i = 0
         for child in successors(node, depth):
             if child != None:
                 cost, _ = minimax(child, depth - 1, True)
-                if cost < best_cost:
+                if  best_cost > cost:
                     best_cost = cost
                     best_col = i
             i += 1

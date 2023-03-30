@@ -1,5 +1,9 @@
 from auxFunctions import printBoard, player_input, computer_move
 from checkWin import checkWin
+from utility import utility
+from game import board_game
+from auxFunctions import successors
+import board as b
 
 PLAYER_PIECE = 'X'
 COMPUTER_PIECE = 'O'
@@ -11,7 +15,7 @@ def main():
 
     count = 0                                   #contar a quantidade de jogadas
     piece_Played = PLAYER_PIECE                 # peça atual -> jogador começa (computador é sempre o jogador 2)
-    printBoard(board)
+    b.main(board)
 
     while count < 42:                           # se chegar às 42 jogadas e ainda não tiver ocorrido uma vitória, declara-se empate
         count += 1
@@ -19,13 +23,18 @@ def main():
         if piece_Played == PLAYER_PIECE:
             board = player_input(board)
             print("Player")
-            printBoard(board)
+            b.main(board)
+            # print("")
+            # print(successors(board, 3))
+
         else:
             board = computer_move(board)
             print("Computer")
-            printBoard(board)
+            b.main(board)
+            # print("")
+            # print(successors(board, 2))
 
-        if checkWin(piece_Played, board):
+        if checkWin(piece_Played, board) is not None:
             print("Good Game: " + piece_Played +  " win's")
             return
 
