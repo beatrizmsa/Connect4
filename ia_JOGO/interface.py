@@ -10,7 +10,7 @@ from constanc import WIDTH,HEIGHT, DEEPSKYBLUE, SQUARE_SIZE, RADIUS, SNOW, ROWS
 FPS = 60
 pygame.init()
 WIN = pygame.display.set_mode((WIDTH,HEIGHT))
-FRONT = pygame.font.SysFont("monospace",55)
+FONT = pygame.font.SysFont("arial",50)
 pygame.display.set_caption('Connect 4')
 
 # nossa main
@@ -40,7 +40,7 @@ def humam_output(event,label, board):
         board.board[col][row] = board.turn
         pygame.draw.circle(WIN, board.color, (posx, int(SQUARE_SIZE/2)), RADIUS)
         if board.checkWin(board.turn):
-            label = FRONT.render(board.label,1,board.color)
+            label = FONT.render(board.label,1,board.color)
             return False, label
     return True, label
 
@@ -125,7 +125,7 @@ def main(type, method):
                 if row != ROWS:
                     board.board[col][row] = board.turn
                     if board.checkWin(board.turn):
-                        label = FRONT.render(board.label,1,board.color)
+                        label = FONT.render(board.label,1,board.color)
                         game = False
                     board.turn = PLAYER_PIECE
                     board.set_label_color()
