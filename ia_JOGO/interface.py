@@ -4,7 +4,7 @@ import sys
 import math
 from board1 import *
 from strategies import minimax
-from constanc import WIDTH,HEIGHT, RED, SQUARE_SIZE, RADIUS, WHITE, ROWS
+from constanc import WIDTH,HEIGHT, DEEPSKYBLUE, SQUARE_SIZE, RADIUS, SNOW, ROWS
 
 # FPS
 FPS = 60
@@ -25,12 +25,12 @@ def creat_board():
     return board
 
 def mouse_motion(win, event, turn):
-    pygame.draw.rect(win, WHITE, (0,0, WIDTH, SQUARE_SIZE))
+    pygame.draw.rect(win, SNOW, (0,0, WIDTH, SQUARE_SIZE))
     posx = event.pos[0]
     if turn == PLAYER_PIECE:
-        pygame.draw.circle(win, RED, (posx, int(SQUARE_SIZE/2)), RADIUS)
+        pygame.draw.circle(win, DEEPSKYBLUE, (posx, int(SQUARE_SIZE/2)), RADIUS)
     else:
-        pygame.draw.circle(win, BLACK, (posx, int(SQUARE_SIZE/2)), RADIUS)
+        pygame.draw.circle(win, LIGHTSTEEL, (posx, int(SQUARE_SIZE/2)), RADIUS)
 
 def humam_output(event,label, board):
     posx = event.pos[0]
@@ -61,7 +61,7 @@ def printBoard(board):
     print(" ")
 
 def main(type, method):
-    
+
     game = True
     clock = pygame.time.Clock()
     board = Board()
@@ -80,7 +80,7 @@ def main(type, method):
                     mouse_motion(WIN,event,board.turn)
                     pygame.display.update()
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    pygame.draw.rect(WIN, WHITE, (0,0, WIDTH, SQUARE_SIZE))
+                    pygame.draw.rect(WIN, SNOW, (0,0, WIDTH, SQUARE_SIZE))
                     if board.turn == PLAYER_PIECE:
                         game, label = humam_output(event,label,board)
                         print(board.utility())
@@ -112,15 +112,15 @@ def main(type, method):
                     mouse_motion(WIN,event,board.turn)
                     pygame.display.update()
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    pygame.draw.rect(WIN, WHITE, (0,0, WIDTH, SQUARE_SIZE))
+                    pygame.draw.rect(WIN, SNOW, (0,0, WIDTH, SQUARE_SIZE))
                     if board.turn == PLAYER_PIECE:
                         game, label = humam_output(event,label,board)
                         pygame.display.update()
                         board.turn = COMPUTER_PIECE
                         board.set_label_color()
-            
+
             if board.turn == COMPUTER_PIECE and game != False:
-                _,col = minimax(board, 5, True)
+                _,col = minimax(board, 3, True)
                 row = board.count_pieces(col)
                 if row != ROWS:
                     board.board[col][row] = board.turn
@@ -129,7 +129,7 @@ def main(type, method):
                         game = False
                     board.turn = PLAYER_PIECE
                     board.set_label_color()
-    
+
             board.draw(WIN)
             pygame.display.update()
             if label != None :
@@ -139,5 +139,5 @@ def main(type, method):
                 pygame.time.wait(2500)
         pygame.quit()
 
-    
+
 main(sys.argv[1], sys.argv[2])

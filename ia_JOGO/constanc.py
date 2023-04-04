@@ -5,7 +5,7 @@ WIDTH,HEIGHT, RADIUS = COLS*SQUARE_SIZE,(ROWS+1)*SQUARE_SIZE, int(SQUARE_SIZE/2 
 COMPUTER_PIECE= 'X'   # computador no minmax queremos sempre o maximo, logo a nosso pontuaçao tem que ser positiva
 PLAYER_PIECE = 'O'
 #rgb
-PURPLE = (195, 180, 220)
-WHITE = (255, 255, 255)
-RED = (255,0,0)
-BLACK = (0,0,0)
+STEELBLUE = (70,130,180)
+SNOW = (255, 250, 250)
+DEEPSKYBLUE = (0,191,255)
+LIGHTSTEEL = (176,196,222)
