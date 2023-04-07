@@ -10,6 +10,7 @@ class Board:
         self.turn = ''
         self.color = self.set_color()
         self.label = self.set_label()
+        self.fullcolumn = "Full column, try again!"
 
     def set_label_color(self):
         self.color = self.set_color()
@@ -138,7 +139,7 @@ class Board:
         return True
 
     def is_winner(self):
-        return self.checkWin(COMPUTER_PIECE)
+        return self.checkWin(COMPUTER_PIECE) or self.checkWin(PLAYER_PIECE)
 
 
     def draw(self,win):

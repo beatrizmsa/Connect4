@@ -36,12 +36,23 @@ def humam_output(event,label, board):
     posx = event.pos[0]
     col = int(math.floor(posx/SQUARE_SIZE))
     row = board.count_pieces(col)
-    if row != ROWS:
+    if row < ROWS:
         board.board[col][row] = board.turn
         pygame.draw.circle(WIN, board.color, (posx, int(SQUARE_SIZE/2)), RADIUS)
         if board.checkWin(board.turn):
             label = FONT.render(board.label,1,board.color)
             return False, label
+    else:
+        #label = "Full column, try again!"
+        #WIN.blit(label,(40,10))
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            pygame.draw.rect(WIN, SNOW, (0,0, WIDTH, SQUARE_SIZE))
+            if board.turn == PLAYER_PIECE:
+                game, label = humam_output(event,label,board)
+                print(board.utility())
+                printBoard(board.board)
+                board.turn = COMPUTER_PIECE
+                board.set_label_color()
     return True, label
 
 
@@ -69,6 +80,7 @@ def main(type, method):
     board.turn = random.choice(PLAYER_PIECE + COMPUTER_PIECE)
     board.set_label_color()
     label = None
+    fullcolunm  = "Full column, try again!"
 
     if method == '-' and type == '2-player':
         while game:
@@ -114,21 +126,35 @@ def main(type, method):
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     pygame.draw.rect(WIN, SNOW, (0,0, WIDTH, SQUARE_SIZE))
                     if board.turn == PLAYER_PIECE:
-                        game, label = humam_output(event,label,board)
-                        pygame.display.update()
-                        board.turn = COMPUTER_PIECE
-                        board.set_label_color()
+                        posx = event.pos[0]
+                        col = int(math.floor(posx/SQUARE_SIZE))
+                        row = board.count_pieces(col)
+                        if row < ROWS:
+                            game, label = humam_output(event,label,board)
+                            board.draw(WIN)
+                            pygame.display.update()
+                            board.turn = COMPUTER_PIECE
+                            board.set_label_color()
+                        #else:
+                            #WIN.blit(fullcolunm,(40,10))
+                            #pygame.display.update()
+
 
             if board.turn == COMPUTER_PIECE and game != False:
-                _,col = minimax(board, 3, True)
-                row = board.count_pieces(col)
-                if row != ROWS:
-                    board.board[col][row] = board.turn
-                    if board.checkWin(board.turn):
-                        label = FONT.render(board.label,1,board.color)
-                        game = False
-                    board.turn = PLAYER_PIECE
-                    board.set_label_color()
+                best_cost = -math.inf
+                best_col = 0
+                for(col,newboard) in board.successors(COMPUTER_PIECE):
+                    cost = minimax(newboard ,4,False)
+                    if cost > best_cost:
+                        best_cost = cost
+                        best_col = col
+                row = board.count_pieces(best_col)
+                board.board[best_col][row] = board.turn
+                if board.checkWin(board.turn):
+                    label = FONT.render(board.label,1,board.color)
+                    game = False
+                board.turn = PLAYER_PIECE
+                board.set_label_color()
 
             board.draw(WIN)
             pygame.display.update()
