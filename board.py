@@ -1,105 +1,193 @@
-import contextlib
+import pygame, copy, random
+from constant import *
 
-with contextlib.redirect_stdout(None):
-    import pygame
+class Board:
+    def __init__(self) -> None:
+        self.board = [[" "," "," "," "," "," "],
+                     [" "," "," "," "," "," "],
+                     [" "," "," "," "," "," "],
+                     [" "," "," "," "," "," "],
+                     [" "," "," "," "," "," "],
+                     [" "," "," "," "," "," "],
+                     [" "," "," "," "," "," "]]
+        self.selected_piece = None
+        self.turn = random.choice(PLAYER_PIECE + COMPUTER_PIECE)
+        self.color = self.set_color()
+        self.label = self.set_label()
+        self.fullcolumn = "Full column, try again!"
 
-from time import sleep
-import auxFunctions
-import strategies
-import checkWin
+    def set_color(self):
+        if self.turn == PLAYER_PIECE:
+            color = DEEPSKYBLUE
+        else:
+            color = LIGHTSTEEL
+        return color
 
-PLAYER_PIECE = 'X'
-COMPUTER_PIECE = 'O'
-CURRENT_PLAYER = PLAYER_PIECE
+    def set_label(self):
+        if self.turn == PLAYER_PIECE:
+            label = "Player Deep Sky Blue wins!! "
+        else:
+            label = "Player Steel Blue wins!!"
+        return label
 
-WINDOW_WIDTH = 700
-WINDOW_HEIGHT = 600
-CELL_SIZE = 100
+    def set_label_color(self):
+        self.color = self.set_color()
+        self.label = self.set_label()
 
-WHITE = (255, 255, 255)
-BLACK = (0, 0, 0)
-RED = (255, 0, 0)
-YELLOW = (255, 225, 0)
+    def set_turn(self):
+        if self.turn == PLAYER_PIECE:
+            turn = COMPUTER_PIECE
+        else:
+            turn = PLAYER_PIECE
+        return turn
 
-def switch_player():
-    global CURRENT_PLAYER
-    if CURRENT_PLAYER == PLAYER_PIECE:
-        CURRENT_PLAYER = COMPUTER_PIECE
-    else:
-        CURRENT_PLAYER = PLAYER_PIECE
+    def count_pieces(self, col):
+        count = 0
+        for i in range(0, 6):
+            if (self.board[col][i] != ' '): #
+                count += 1
+        return count
 
-def draw_board(board, screen):
-    # Fill screen with white background
-    screen.fill(WHITE)
+    def checkWin(self, piece):
+        # horizontal
+        for j in range(3,ROWS):
+            for i in range(COLS):
+                if (self.board[i][j] == self.board[i][j - 1] == self.board[i][j - 2] == self.board[i][j - 3] == piece):
+                        return True
 
-    # Draw gridlines
-    for i in range(8):
-        pygame.draw.line(screen, BLACK, (i * CELL_SIZE, 0), (i * CELL_SIZE, WINDOW_HEIGHT), 5)
-    for i in range(7):
-        pygame.draw.line(screen, BLACK, (0, (i + 1) * CELL_SIZE), (WINDOW_WIDTH, (i + 1) * CELL_SIZE), 5)
+        # vertical
+        for j in range(ROWS):
+            for i in range(3, COLS):
+                if (self.board[i][j] == self.board[i - 1][j] == self.board[i - 2][j] == self.board[i - 3][j] == piece):
+                        return True
 
-    # Draw game pieces
-    for i in range(7):
-        for j in range(6):
-            if board[i][j] == 'X':
-                pygame.draw.circle(screen, RED, (int((j + 0.5) * CELL_SIZE), int((i + 0.5) * CELL_SIZE)),
-                                   int(CELL_SIZE * 0.4))
-            elif board[i][j] == 'O':
-                pygame.draw.circle(screen, YELLOW, (int((j + 0.5) * CELL_SIZE), int((i + 0.5) * CELL_SIZE)),
-                                   int(CELL_SIZE * 0.4))
+        # diagonal
+        for i in range(0, 3):
+            for j in range(0, 4):
+                if (self.board[j][i] == self.board[j + 1][i + 1] == self.board[j + 2][i + 2] == self.board[j + 3][i + 3] == piece or
+                    self.board[j + 3][i] == self.board[j + 2][i + 1] == self.board[j + 1][i + 2] == self.board[j][i + 3] == piece):
+                        return True
+        return False
 
+    def utility(self):
+        pontuation = 0
 
-def handle_input(game, algorithm = None):
-    pos = pygame.mouse.get_pos()
-    column = pos[0] // CELL_SIZE
-    game, flag = auxFunctions.move(game, column, CURRENT_PLAYER)
-    if flag:
-        if algorithm is not None and not checkWin.checkWin(game):
-            auxFunctions.move(game, strategies.minimax(game, algorithm), COMPUTER_PIECE)
-    return game
+        if self.checkWin(COMPUTER_PIECE):
+            return 512
 
-def game_over_screen(screen, winner):
-    pygame.font.init()
-    screen.fill(WHITE)
+        if self.checkWin(PLAYER_PIECE):
+            return -512
 
-    font = pygame.font.SysFont("Arial", 50)
+        else:
+            # verificar vertical
+            for j in range(COLS):
+                for i in range(3):
+                    count_O = 0
+                    count_X = 0
+                    for k in range(i, i + 4):
+                        if (self.board[j][k] == PLAYER_PIECE):
+                            count_O += 1
+                        elif (self.board[j][k] == COMPUTER_PIECE):
+                            count_X += 1
+                    pontuation += check_subset_pontuation(count_O, count_X)
 
-    if winner == "X":
-        winner_text = font.render("Red wins!", True, RED)
-    elif winner == "O":
-        winner_text = font.render("Yellow wins!", True, YELLOW)
-    else:
-        winner_text = font.render("It's a tie!", True, BLACK)
+            # verificar horizontal
+            for i in range(ROWS):
+                for j in range(COLS - 3):
+                    count_O = 0
+                    count_X = 0
+                    for k in range(j, j + 4):
+                        if self.board[k][i] == PLAYER_PIECE:
+                            count_O += 1
+                        elif self.board[k][i] == COMPUTER_PIECE:
+                            count_X += 1
+                    pontuation += check_subset_pontuation(count_O, count_X)
 
-    winner_text_rect = winner_text.get_rect(center=(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 3))
-    screen.blit(winner_text, winner_text_rect)
+            # verificar diagonal contraria
+            for j in range(COLS - 3):
+                for i in range(0, 3):
+                    count_O = 0
+                    count_X = 0
+                    for k in range(0, 4):
+                        if self.board[j + k][i + k] == PLAYER_PIECE:
+                            count_O += 1
+                        elif self.board[j + k][i + k] == COMPUTER_PIECE:
+                            count_X += 1
+                    pontuation += check_subset_pontuation(count_O, count_X)
 
-    pygame.display.update()
-    sleep(1.5)
+            # verificar diagonal principal
+            for j in range(3, COLS):
+                for i in range(0, 3):
+                    count_O = 0
+                    count_X = 0
+                    for k in range(0, 4):     # controla os incrementos dos i's e os decrementos dos j's
+                        if self.board[j - k][i + k] == PLAYER_PIECE:
+                            count_O += 1
+                        elif self.board[j - k][i + k] == COMPUTER_PIECE:
+                            count_X += 1
+                    pontuation += check_subset_pontuation(count_O, count_X)
 
+        return pontuation
 
-def main(game, algorithm=None):
-    flag = False
-    pygame.init()
-    screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
-    pygame.display.set_caption('Connect 4')
+    def draw(self,wind):
+        wind.fill(SNOW)      # cria um fundo branco
+        for c in range(COLS):
+            for r in range(ROWS):
+                pygame.draw.rect(wind, LIGHTSTEEL, (c*SQUARE_SIZE, r*SQUARE_SIZE+SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
+                pygame.draw.circle(wind, SNOW, (int(c*SQUARE_SIZE+SQUARE_SIZE/2), int(r*SQUARE_SIZE+SQUARE_SIZE+SQUARE_SIZE/2)), RADIUS)
 
-    while True:
-        # print(game.get_turn())
-        screen.fill(WHITE)
-        draw_board(game, screen)
-        pygame.display.update()
+        for c in range(COLS):
+            for r in range(ROWS):
+                if self.board[c][r] == PLAYER_PIECE:
+                    pygame.draw.circle(wind, DEEPSKYBLUE, (int(c*SQUARE_SIZE+SQUARE_SIZE/2), HEIGHT-int(r*SQUARE_SIZE+SQUARE_SIZE/2)), RADIUS)
+                elif self.board[c][r] == COMPUTER_PIECE:
+                    pygame.draw.circle(wind, STEELBLUE, (int(c*SQUARE_SIZE+SQUARE_SIZE/2), HEIGHT-int(r*SQUARE_SIZE+SQUARE_SIZE/2)), RADIUS)
 
-        event = pygame.event.wait()
-        if event.type == pygame.QUIT:
-            exit()
-        elif event.type == pygame.MOUSEBUTTONDOWN:
-            game=handle_input(game, algorithm)
+    def is_winner(self):
+        return self.checkWin(COMPUTER_PIECE) or self.checkWin(PLAYER_PIECE)
 
-        if flag:
-            sleep(2.5)
-            game_over_screen(screen, checkWin.checkWin())
-            exit()
+    def printBoard(self):
+        top = '    1   2   3   4   5   6   7   '
 
-        if checkWin.checkWin(CURRENT_PLAYER, game):
-            flag = True
+        for j in range(0, ROWS):
+            string = "   "
+            j1 = 5 - j
+            for i in range(0, COLS):
+                if(self.board[i][j1] != " "):
+                    string += " " + self.board[i][j1] + "  "
+                else:
+                    string += ' -  '
+            print(string)
+        print(top)
+        print(" ")
+
+    def successors(self,piece):     # board é o tabuleiro atual sem a jogada resultante do computador
+        successors = []             # guardar todos os successores do nó atual
+        for col in range(COLS):
+            newboard = Board()
+            newboard.board = copy.deepcopy(self.board)
+            row = self.count_pieces(col)       # contar a quantidade de espaços ocupados em cada coluna do tabuleiro (i) e colocamos a peça na linha correspondente a esse valor
+            if row != ROWS:                    # só se coloca um peça nessa coluna se a mesma não estiver totalmente ocupada
+                newboard.board[col][row] = piece
+                successors.append((col,newboard))
+                if newboard.checkWin(piece):
+                    list = []
+                    list.append((col,newboard))
+                    return list
+        return successors
+
+def check_subset_pontuation(count_O, count_X): # verificar a pontuação de cada sub-conjunto
+        pontuation = 0
+        if count_O == 3 and count_X == 0:
+            pontuation -= 50
+        if count_X == 3 and count_O == 0:
+            pontuation += 50
+        if count_O == 2 and count_X == 0:
+            pontuation -= 10
+        if count_X == 2 and count_O == 0:
+            pontuation += 10
+        if count_O == 1 and count_X == 0:
+            pontuation -= 1
+        if count_X == 1 and count_O == 0:
+            pontuation += 1
+        return pontuation
