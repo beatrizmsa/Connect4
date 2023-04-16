@@ -20,7 +20,7 @@ class Board:
         if self.turn == PLAYER_PIECE:
             color = DEEPSKYBLUE
         else:
-            color = LIGHTSTEEL
+            color = STEELBLUE
         return color
 
     def set_label(self):
