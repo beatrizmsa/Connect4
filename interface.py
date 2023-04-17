@@ -40,6 +40,7 @@ def humam_output(event,label, board):
     return True, label
 
 def main(type, method):
+
     game = True
     clock = pygame.time.Clock()
     board = Board()
@@ -80,6 +81,7 @@ def main(type, method):
 
     elif method == 'minimax':
         if type == 'playerVScomputer':
+            print("playerVScomputer -> minimax")
             while game:
                 clock.tick(FPS)
                 for event in pygame.event.get():
@@ -145,7 +147,9 @@ def main(type, method):
                         game = False
                     board.turn = COMPUTER_PIECE
                     board.set_label_color()
+
                 pygame.time.wait(2500)
+
                 if board.turn == COMPUTER_PIECE and game != False:
                     best_cost = -math.inf
                     best_col = 0
@@ -173,6 +177,7 @@ def main(type, method):
 
     elif method == 'alphabeta':
         if type == 'playerVScomputer':
+            print("playerVScomputer -> alphabeta")
             while game:
                 clock.tick(FPS)
                 for event in pygame.event.get():
@@ -220,6 +225,98 @@ def main(type, method):
             pygame.quit()
         elif type == 'computerVScomputer':
             print('computerVScomputer -> alphabeta')
-            # ...
+            while game:
+                clock.tick(FPS)
+                if board.turn == PLAYER_PIECE and game != False:
+                    best_cost = +math.inf
+                    best_col = 0
+                    for(col,newboard) in board.successors(PLAYER_PIECE):
+                        cost = alphabeta(newboard,3,math.inf,-math.inf,True)
+                        if  best_cost > cost:
+                            best_cost = cost
+                            best_col = col
+                    row = board.count_pieces(best_col)
+                    board.board[best_col][row] = board.turn
+                    if board.checkWin(board.turn):
+                        label = FONT.render(board.label,1,board.color)
+                        game = False
+                    board.turn = COMPUTER_PIECE
+                    board.set_label_color()
+                    
+                pygame.time.wait(2500)
+
+                if board.turn == COMPUTER_PIECE and game != False:
+                    best_cost = -math.inf
+                    best_col = 0
+                    for(col,newboard) in board.successors(COMPUTER_PIECE):
+                        cost = alphabeta(newboard,3,-math.inf,math.inf,False)
+                        if cost > best_cost:
+                            best_cost = cost
+                            best_col = col
+                    row = board.count_pieces(best_col)
+                    board.board[best_col][row] = board.turn
+                    if board.checkWin(board.turn):
+                        label = FONT.render(board.label,1,board.color)
+                        game = False
+                    board.turn = PLAYER_PIECE
+                    board.set_label_color()
+
+                board.draw(WINDOW)
+                pygame.display.update()
+                if label != None :
+                    WINDOW.blit(label,(40,10))
+                    pygame.display.update()
+                if game == False:
+                    pygame.time.wait(10000)
+            pygame.quit()
+
+    elif method == 'montecarlo':
+        if type == 'playerVScomputer':
+            print("playerVScomputer -> montecarlo")
+            while game:
+                clock.tick(FPS)
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        game = False
+                    if event.type == pygame.MOUSEMOTION:
+                        mouse_motion(WINDOW,event,board.turn)
+                        pygame.display.update()
+                    if event.type == pygame.MOUSEBUTTONDOWN:
+                        pygame.draw.rect(WINDOW, SNOW, (0,0, WIDTH, SQUARE_SIZE))
+                        if board.turn == PLAYER_PIECE:
+                            posx = event.pos[0]
+                            col = int(math.floor(posx/SQUARE_SIZE))
+                            row = board.count_pieces(col)
+                            if row < ROWS:
+                                game, label = humam_output(event,label,board)
+                                board.draw(WINDOW)
+                                pygame.display.update()
+                                board.turn = COMPUTER_PIECE
+                                board.set_label_color()
+
+                if board.turn == COMPUTER_PIECE and game != False:
+                    best_cost = -math.inf
+                    best_col = 0
+                    for(col,newboard) in board.successors(COMPUTER_PIECE):
+                        cost = montecarlo(newboard,3)
+                        if cost > best_cost:
+                            best_cost = cost
+                            best_col = col
+                    row = board.count_pieces(best_col)
+                    board.board[best_col][row] = board.turn
+                    if board.checkWin(board.turn):
+                        label = FONT.render(board.label,1,board.color)
+                        game = False
+                    board.turn = PLAYER_PIECE
+                    board.set_label_color()
+
+                board.draw(WINDOW)
+                pygame.display.update()
+                if label != None :
+                    WINDOW.blit(label,(40,10))
+                    pygame.display.update()
+                if game == False:
+                    pygame.time.wait(10000)
+            pygame.quit()
 
 main(sys.argv[1], sys.argv[2])

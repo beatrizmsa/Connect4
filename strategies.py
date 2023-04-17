@@ -37,3 +37,18 @@ def alphabeta(board, depth, alpha, beta, maximizingPlayer):
             if beta <= alpha:
                 break
         return best_cost
+
+def montecarlo(board, limit):
+
+        if board.is_winner():
+            return board.utility()
+        best_cost = -math.inf
+        for (col, newboard) in board.successors(COMPUTER_PIECE):
+            cost = 0
+            for i in range(limit):
+                cost += newboard.simulate()
+            cost = cost / limit
+            if cost > best_cost:
+                best_cost = cost
+                best_col = col
+        return best_col

@@ -190,3 +190,14 @@ def check_subset_pontuation(count_O, count_X): # verificar a pontuação de cada
         if count_X == 1 and count_O == 0:
             pontuation += 1
         return pontuation
+
+def simulate(self):
+        if self.is_winner():
+            return self.utility()
+        else:
+            col = random.randint(0, COLS - 1)
+            while not self.is_valid(col):
+                col = random.randint(0, COLS - 1)
+            newboard = self.copy()
+            newboard.add_piece(col, PLAYER_PIECE)
+            return newboard.simulate()
