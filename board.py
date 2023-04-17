@@ -14,7 +14,6 @@ class Board:
         self.turn = random.choice(PLAYER_PIECE + COMPUTER_PIECE)
         self.color = self.set_color()
         self.label = self.set_label()
-        self.fullcolumn = "Full column, try again!"
 
     def set_color(self):
         if self.turn == PLAYER_PIECE:
@@ -25,9 +24,9 @@ class Board:
 
     def set_label(self):
         if self.turn == PLAYER_PIECE:
-            label = "Player Deep Sky Blue wins!! "
+            label = "light blue player wins !"
         else:
-            label = "Player Steel Blue wins!!"
+            label = "dark blue player wins !"
         return label
 
     def set_label_color(self):
