@@ -11,7 +11,8 @@ class Board:
                      [" "," "," "," "," "," "],
                      [" "," "," "," "," "," "]]
         self.selected_piece = None
-        self.turn = random.choice(PLAYER_PIECE + COMPUTER_PIECE)
+        self.moves = 0
+        self.turn = PLAYER_PIECE
         self.color = self.set_color()
         self.label = self.set_label()
 
