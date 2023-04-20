@@ -1,5 +1,8 @@
-import pygame, copy, random
+import copy, random
 from constant import *
+import contextlib
+with contextlib.redirect_stdout(None):
+    import pygame
 
 class Board:
     def __init__(self) -> None:
