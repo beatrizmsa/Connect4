@@ -326,7 +326,7 @@ def main():
                             board.set_label_color()
 
             if board.turn == COMPUTER_PIECE and game != False:
-                best_col = monte_carlo(newboard)
+                best_col = monte_carlo(board)
                 row = board.count_pieces(best_col)
                 board.board[best_col][row] = board.turn
                 if board.checkWin(board.turn):

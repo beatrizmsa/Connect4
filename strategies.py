@@ -1,7 +1,8 @@
 from board import *
 from constant import *
 from concurrent.futures import ThreadPoolExecutor
-import math, os, random, time
+import math, os, random
+from time import time
 
 def minimax(board, depth, maximizingPlayer):
 
@@ -10,13 +11,14 @@ def minimax(board, depth, maximizingPlayer):
     if maximizingPlayer:
         best_cost = -math.inf
         for (col, newboard) in board.successors(COMPUTER_PIECE):
-            best_cost = max(best_cost,minimax(newboard, depth - 1, False))
+            best_cost = max(best_cost, minimax(newboard, depth - 1, False))
         return best_cost
     else:
         best_cost = +math.inf
-        for (col,newboard) in board.successors(PLAYER_PIECE):
-            best_cost = min(best_cost,minimax(newboard, depth - 1, True))
+        for (col, newboard) in board.successors(PLAYER_PIECE):
+            best_cost = min(best_cost, minimax(newboard, depth - 1, True))
         return best_cost
+
 
 def alphabeta(board, depth, alpha, beta, maximizingPlayer):
 
@@ -25,7 +27,7 @@ def alphabeta(board, depth, alpha, beta, maximizingPlayer):
     if maximizingPlayer:
         best_cost = -math.inf
         for (col, newboard) in board.successors(COMPUTER_PIECE):
-            best_cost = max(best_cost,alphabeta(newboard, depth - 1, alpha, beta, False))
+            best_cost = max(best_cost, alphabeta(newboard, depth - 1, alpha, beta, False))
             alpha = max(alpha, best_cost)
             if beta <= alpha:
                 break
@@ -33,7 +35,7 @@ def alphabeta(board, depth, alpha, beta, maximizingPlayer):
     else:
         best_cost = +math.inf
         for (col, newboard) in board.successors(PLAYER_PIECE):
-            best_cost = min(best_cost,alphabeta(newboard, depth - 1, alpha, beta, True))
+            best_cost = min(best_cost, alphabeta(newboard, depth - 1, alpha, beta, True))
             beta = min(beta, best_cost)
             if beta <= alpha:
                 break
@@ -54,6 +56,7 @@ def montecarlo(board, limit):
         node.visits += 1
     return max(root.children, key = lambda c: c.visits).game.last_move
 
+
 def rollout(board):
     while not board.is_winner():
         board = random.choice(board.successors()[0])[1]
@@ -64,24 +67,30 @@ C = math.sqrt(2)
 
 
 class Node:
-    def _init_(self, game, parent = None):
+    def __init__(self, game, parent = None, turn = None):
         self.game = game
         self.parent = parent
+        self.turn = turn
         self.children = []
         self.wins = 0
         self.visits = 0
 
     def is_leaf(self):
         return len(self.children) == 0
+    def set_turn(self):
+        if self.turn == "X":
+            return "O"
+        else:
+            return "X"
 
     def is_fully_expanded(self):
-        possible_moves, _ = successors(self.game)
+        possible_moves= self.game.successors(self.turn)
         return len(self.children) == len(possible_moves)
 
     def expand(self):
-        possible_moves, _ =  game.successors()
-        for move in possible_moves:
-            self.children.append(Node(move, self))
+        possible_moves =  self.game.successors(self.turn)
+        for (col,move) in possible_moves:
+            self.children.append(Node(move, self, self.set_turn()))
 
     def select_child(self):
         total_visits = math.log(self.visits)
@@ -108,19 +117,19 @@ class Node:
 def monte_carlo_tree_search(game, T = 1, num_threads = os.cpu_count()):
     def simulate(game):
         while game:
-            possible_moves, _ = successors(game)
-            game = random.choice(possible_moves)
+            possible_moves = game.successors(game.turn)
+            game = random.choice(possible_moves[1])
         if game.get_winner() == "X":
             return 1
         else:
             return -1
 
-    root = Node(game)
+    root = Node(game, None, game.turn)
     ti = time()
     tf = time()
     execution_times = []
     nodes_expanded = []
-    with ThreadPoolExecutor(max_workers=num_threads) as executor:
+    with ThreadPoolExecutor(max_workers = num_threads) as executor:
         while tf - ti < T:
             node = root
 
@@ -134,8 +143,8 @@ def monte_carlo_tree_search(game, T = 1, num_threads = os.cpu_count()):
 
             # Simulate
             futures = []
-            possible_moves, _ = successors(new_node.game)
-            for move in possible_moves:
+            possible_moves= new_node.game.successors(new_node.turn)
+            for (col,move) in possible_moves:
                 futures.append(executor.submit(simulate, move))
 
             results = [f.result() for f in futures]
@@ -160,9 +169,6 @@ def monte_carlo_tree_search(game, T = 1, num_threads = os.cpu_count()):
 
     # Return results and metrics
     return best_move, execution_times, nodes_expanded
-
-
-
 
 
 def monte_carlo(game):
