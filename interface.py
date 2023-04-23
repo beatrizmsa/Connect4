@@ -77,10 +77,12 @@ def main():
                     pygame.draw.rect(WINDOW, SNOW, (0, 0, WIDTH, SQUARE_SIZE))
                     if board.turn == PLAYER_PIECE:
                         game, label = humam_output(event, label, board, WINDOW, FONT)
+                        board.printBoard()
                         board.set_turn()
                         board.moves += 1
                     else:
                         game, label = humam_output(event, label, board, WINDOW, FONT)
+                        board.printBoard()
                         board.set_turn()
                         board.moves += 1
             board.draw(WINDOW)
@@ -93,20 +95,14 @@ def main():
                 WINDOW.blit(tie, (40, 10))
                 pygame.display.update()
             if game == False:
-                '''
                 if(board.moves < 42):
                     if(board.turn == PLAYER_PIECE):
                         board.turn = COMPUTER_PIECE
                     else:
                         board.turn = PLAYER_PIECE
-                        print("Player ", board.turn, " wins !")
+                    print("Player ", board.turn, " wins !")
                 else:
-                    if(board.turn == PLAYER_PIECE):
-                        board.turn = COMPUTER_PIECE
-                    else:
-                        board.turn = PLAYER_PIECE
                     print("Tie !")
-                '''
                 pygame.time.wait(10000)
         pygame.quit()
 
@@ -125,26 +121,22 @@ def main():
                     pygame.draw.rect(WINDOW, SNOW, (0, 0, WIDTH, SQUARE_SIZE))
                     if board.turn == PLAYER_PIECE:
                         game, label = humam_output(event, label, board, WINDOW,FONT)
+                        board.printBoard()
                         board.draw(WINDOW)
                         pygame.display.update()
                         board.set_turn()
                         board.moves += 1
-            
+
             if board.turn == COMPUTER_PIECE and game != False:
                 start = time.time()
-                _,cols,_ = minimax(board, MAX_DEPTH, True)
+                _, cols ,_ = minimax(board, MAX_DEPTH, True)
                 best_col = random.choice(cols)
                 row = board.count_pieces(best_col)
                 board.board[best_col][row] = board.turn
                 if board.checkWin(board.turn):
                     label = FONT.render(board.label, 1, board.color)
                     game = False
-                '''end = time.time()
-                print()
-                print("nodes generated: ", board.visit)
-                print("time: ", end - start, "seconds")
-                start = time.time()
-                '''
+                board.printBoard()
                 board.set_turn()
                 board.moves += 1
             board.draw(WINDOW)
@@ -157,6 +149,14 @@ def main():
                 WINDOW.blit(tie, (40, 10))
                 pygame.display.update()
             if game == False:
+                if(board.moves < 42):
+                    if(board.turn == PLAYER_PIECE):
+                        board.turn = COMPUTER_PIECE
+                    else:
+                        board.turn = PLAYER_PIECE
+                    print("Player ", board.turn, " wins !")
+                else:
+                    print("Tie !")
                 print()
                 end = time.time()
                 print("nodes generated: ", board.visit)
@@ -165,7 +165,6 @@ def main():
 
     elif type == 2 and method == 2:
         print("player VS computer -> alphabeta")
-        start = time.time()
         while game:
             clock.tick(FPS)
             for event in pygame.event.get():
@@ -179,24 +178,21 @@ def main():
                     pygame.draw.rect(WINDOW, SNOW, (0, 0, WIDTH, SQUARE_SIZE))
                     if board.turn == PLAYER_PIECE:
                         game, label = humam_output(event, label,board, WINDOW, FONT)
+                        board.printBoard()
                         board.draw(WINDOW)
                         pygame.display.update()
                         board.set_turn()
                         board.moves += 1
 
             if board.turn == COMPUTER_PIECE and game != False:
-                #start = time.time()
-                _,cols,_ = alphabeta(board, MAX_DEPTH, -math.inf, math.inf, True)
+                _, cols ,_ = alphabeta(board, MAX_DEPTH, -math.inf, math.inf, True)
                 best_col = random.choice(cols)
                 row = board.count_pieces(best_col)
                 board.board[best_col][row] = board.turn
                 if board.checkWin(board.turn):
                     label = FONT.render(board.label, 1, board.color)
                     game = False
-                #end = time.time()
-                #print()
-                #print("nodes generated: ", board.visit)
-                #print("time: ", end - start, "seconds")
+                board.printBoard()
                 board.set_turn()
                 board.moves += 1
 
@@ -210,17 +206,22 @@ def main():
                 WINDOW.blit(tie, (40, 10))
                 pygame.display.update()
             if game == False:
+                if(board.moves < 42):
+                    if(board.turn == PLAYER_PIECE):
+                        board.turn = COMPUTER_PIECE
+                    else:
+                        board.turn = PLAYER_PIECE
+                    print("Player ", board.turn, " wins !")
+                else:
+                    print("Tie !")
                 print()
-                end = time.time()
-                print()
-                print("time: ", end - start, "seconds")
+                print("nodes generated: ", board.visit)
                 pygame.time.wait(10000)
         pygame.quit()
 
     elif type == 2 and method == 3:
         print("player VS computer -> montecarlo")
         while game:
-            start = time.time()
             clock.tick(FPS)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -237,6 +238,7 @@ def main():
                         row = board.count_pieces(col)
                         if row < ROWS:
                             game, label = humam_output(event, label, board, WINDOW, FONT)
+                            board.printBoard()
                             board.draw(WINDOW)
                             pygame.display.update()
                             board.turn = COMPUTER_PIECE
@@ -249,6 +251,7 @@ def main():
                 if board.checkWin(board.turn):
                     label = FONT.render(board.label, 1, board.color)
                     game = False
+                board.printBoard()
                 board.turn = PLAYER_PIECE
                 board.set_label_color()
             board.draw(WINDOW)
@@ -258,8 +261,15 @@ def main():
                 pygame.display.update()
             if game == False:
                 print()
-                end = time.time()
-                print("time: ", end - start, "seconds")
+                if(board.moves < 42):
+                    if(board.turn == PLAYER_PIECE):
+                        board.turn = COMPUTER_PIECE
+                    else:
+                        board.turn = PLAYER_PIECE
+                    print("Player ", board.turn, " wins !")
+                else:
+                    print("Tie !")
+                # print("nodes generated: ", board.visit)
                 pygame.time.wait(10000)
         pygame.quit()
 
