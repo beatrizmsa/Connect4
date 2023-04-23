@@ -226,6 +226,7 @@ def main():
                 pygame.time.wait(CLOSE_TIME)
         pygame.quit()
 
+    # implementação não esta correta
     elif type == 2 and method == 3:
         print("player VS computer -> montecarlo")
         while game:
