@@ -7,170 +7,171 @@ from time import time
 def minimax(board, depth, maximizingPlayer):
 
     if depth == 0 or board.is_winner():
-        return board.utility()
+        return board.utility(), None, board.visit
+    
     if maximizingPlayer:
         best_cost = -math.inf
+        best_col = []
         for (col, newboard) in board.successors(COMPUTER_PIECE):
-            best_cost = max(best_cost, minimax(newboard, depth - 1, False))
-        return best_cost
+            value,_, visit = minimax(newboard, depth - 1, False)
+            if depth == MAX_DEPTH:
+                if best_cost == value:
+                    best_col.append(col)
+                if value > best_cost:
+                    best_cost = value
+                    best_col = []
+                    best_col.append(col)
+            else:
+                best_cost = max(best_cost, value)
+            board.visit += visit
+        return best_cost, best_col, board.visit
+    
     else:
         best_cost = +math.inf
+        best_col = []
         for (col, newboard) in board.successors(PLAYER_PIECE):
-            best_cost = min(best_cost, minimax(newboard, depth - 1, True))
-        return best_cost
+            value,_, visit = minimax(newboard, depth - 1, True)
+            if depth == MAX_DEPTH:
+                if best_cost == value:
+                    best_col.append(col)
+                if best_cost > value:
+                    best_cost = value
+                    best_col = []
+                    best_col.append(col)
+            else:
+                best_cost = min(best_cost, value)
+            board.visit += visit
+        return best_cost, best_col, board.visit
 
 
 def alphabeta(board, depth, alpha, beta, maximizingPlayer):
 
     if depth == 0 or board.is_winner():
-        return board.utility()
+        return board.utility(),None,board.visit
+    
     if maximizingPlayer:
         best_cost = -math.inf
+        best_col = []
         for (col, newboard) in board.successors(COMPUTER_PIECE):
-            best_cost = max(best_cost, alphabeta(newboard, depth - 1, alpha, beta, False))
+            value,_,visit = alphabeta(newboard, depth - 1, alpha, beta, False)
+            if depth == MAX_DEPTH:
+                if best_cost == value:
+                    best_col.append(col)
+                if value > best_cost:
+                    best_cost = value
+                    best_col = []
+                    best_col.append(col)
+            else:
+                best_cost = max(best_cost,value)
+            board.visit += visit
             alpha = max(alpha, best_cost)
             if beta <= alpha:
                 break
-        return best_cost
+        return best_cost, best_col, board.visit
+    
     else:
         best_cost = +math.inf
+        best_col = []
         for (col, newboard) in board.successors(PLAYER_PIECE):
-            best_cost = min(best_cost, alphabeta(newboard, depth - 1, alpha, beta, True))
+            value,_,visit = alphabeta(newboard, depth - 1, alpha, beta, True)
+            if depth == MAX_DEPTH:
+                if best_cost == value:
+                    best_col.append(col)
+                if best_cost > value:
+                    best_cost = value
+                    best_col = []
+                    best_col.append(col)
+            else:
+                best_cost = min(best_cost,value)
+            board.visit += visit
             beta = min(beta, best_cost)
             if beta <= alpha:
                 break
-        return best_cost
-
-
-def montecarlo(board, limit):
-    root = Node(board)
-    start_time = time.time()
-    while time.time() - start_time < limit:
-        node = root
-        while not node.is_leaf():
-            node = node.select_child()
-        if not node.is_fully_expanded():
-            node.expand()
-            node = random.choice(node.children)
-        node.wins += rollout(node.game)
-        node.visits += 1
-    return max(root.children, key = lambda c: c.visits).game.last_move
-
-
-def rollout(board):
-    while not board.is_winner():
-        board = random.choice(board.successors()[0])[1]
-    return board.utility()
-
-TIME = 0.5
-C = math.sqrt(2)
-
+        return best_cost, best_col, board.visit
 
 class Node:
-    def __init__(self, game, parent = None, turn = None):
-        self.game = game
+    def __init__(self,board,parent = None):
+        self.board = board
         self.parent = parent
-        self.turn = turn
         self.children = []
         self.wins = 0
         self.visits = 0
-
+        self.column_used = None
+    
+    def expand_node(self, turn):
+        successors = self.board.successors(turn)
+        if successors:
+            for col, move in successors:
+                move.set_turn()
+                child = Node(move, self)
+                child.column_used = col
+                self.children.append(child)
+    
+    def update(self,result):
+        self.visits += 1
+        self.wins += result
+    
     def is_leaf(self):
         return len(self.children) == 0
-    def set_turn(self):
-        if self.turn == "X":
-            return "O"
-        else:
-            return "X"
-
-    def is_fully_expanded(self):
-        possible_moves= self.game.successors(self.turn)
-        return len(self.children) == len(possible_moves)
-
-    def expand(self):
-        possible_moves =  self.game.successors(self.turn)
-        for (col,move) in possible_moves:
-            self.children.append(Node(move, self, self.set_turn()))
-
+    
+    def has_parent(self):
+        return self.parent is not None
+    
     def select_child(self):
-        total_visits = math.log(self.visits)
-        best_score = -float("inf")
         best_child = None
+        best_value = - math.inf
         for child in self.children:
-            if child.visits == 0:
+            if child.visits == 0 or self.visits <= 0:
                 score = float('inf')
             else:
-                exploration_term = math.sqrt(math.log(total_visits + 1) / child.visits)
-                score = child.wins / child.visits + C * exploration_term
-            if score > best_score:
-                best_score = score
+                exploit = child.wins / child.visits
+                explore = C * math.sqrt(math.log(self.visits) / child.visits)
+                score = exploit + explore
+            if score > best_value:
+                best_value = score
                 best_child = child
         return best_child
 
-    def backpropagate(self, result):
-        self.visits += 1
-        self.wins += result
-        if self.parent is not None:
-            self.parent.backpropagate(result)
+    def simulation(self):
+        possivel_moves = self.board.successors(self.board.turn)
+        if len(possivel_moves) == 0:
+            return self.board
+        return random.choice(possivel_moves)[1]
+    
+def evaluate(board):
+    if board.checkWin(COMPUTER_PIECE):
+        return -1
+    elif board.checkWin(PLAYER_PIECE):
+        return  1
+    else:
+        return 0
 
 
-def monte_carlo_tree_search(game, T = 1, num_threads = os.cpu_count()):
-    def simulate(game):
-        while game:
-            possible_moves = game.successors(game.turn)
-            game = random.choice(possible_moves[1])
-        if game.get_winner() == "X":
-            return 1
-        else:
-            return -1
-
-    root = Node(game, None, game.turn)
+def monte_carlos_tree_search(board, T):
+    root = Node(board)
     ti = time()
     tf = time()
-    execution_times = []
-    nodes_expanded = []
-    with ThreadPoolExecutor(max_workers = num_threads) as executor:
-        while tf - ti < T:
-            node = root
+    while tf- ti < 0.00001:
+        node = root
+        s = copy.deepcopy(board)
+        while not node.is_leaf():
+            node = node.select_child()
 
-            # Select
-            while not node.is_leaf():
-                node = node.select_child()
-
-            # Expand
-            node.expand()
-            new_node = random.choice(node.children)
-
-            # Simulate
-            futures = []
-            possible_moves= new_node.game.successors(new_node.turn)
-            for (col,move) in possible_moves:
-                futures.append(executor.submit(simulate, move))
-
-            results = [f.result() for f in futures]
-            result = sum(results) / len(results)
-
-            # Back propagate
-            new_node.backpropagate(result)
-            tf = time()
-
-            # Keep track of execution time and nodes expanded
-            execution_times.append(tf - ti)
-            nodes_expanded.append(root.visits)
-
-    # Choose best move
-    best_score = float("-inf")
-    best_move = None
+        node.expand_node(node.board.turn)
+        node = node.select_child()
+        while node is not None:
+            s = node.simulation()
+        result = evaluate(s)
+        
+        while node.has_parent():
+            node.update(result)
+            node = node.parent
+    
+    best_score = float('-inf')
+    best_move = 0
     for child in root.children:
         score = child.wins / child.visits
-        if score > best_score:
+        if score >= best_score:
             best_score = score
-            best_move = child.game.get_last_move()
-
-    # Return results and metrics
-    return best_move, execution_times, nodes_expanded
-
-
-def monte_carlo(game):
-    best_move, execution_times, nodes_expanded = monte_carlo_tree_search(game, TIME)
+            best_move = child.column_used
     return best_move
