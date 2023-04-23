@@ -133,19 +133,19 @@ class Board:
 
         return pontuation
 
-    def draw(self,wind):
+    def draw(self, wind):
         wind.fill(SNOW)      # cria um fundo branco
         for c in range(COLS):
             for r in range(ROWS):
-                pygame.draw.rect(wind, LIGHTSTEEL, (c*SQUARE_SIZE, r*SQUARE_SIZE+SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
-                pygame.draw.circle(wind, SNOW, (int(c*SQUARE_SIZE+SQUARE_SIZE/2), int(r*SQUARE_SIZE+SQUARE_SIZE+SQUARE_SIZE/2)), RADIUS)
+                pygame.draw.rect(wind, LIGHTSTEEL, (c * SQUARE_SIZE, r * SQUARE_SIZE + SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
+                pygame.draw.circle(wind, SNOW, (int(c * SQUARE_SIZE + SQUARE_SIZE / 2), int(r * SQUARE_SIZE + SQUARE_SIZE + SQUARE_SIZE / 2)), RADIUS)
 
         for c in range(COLS):
             for r in range(ROWS):
                 if self.board[c][r] == PLAYER_PIECE:
-                    pygame.draw.circle(wind, DEEPSKYBLUE, (int(c*SQUARE_SIZE+SQUARE_SIZE/2), HEIGHT-int(r*SQUARE_SIZE+SQUARE_SIZE/2)), RADIUS)
+                    pygame.draw.circle(wind, DEEPSKYBLUE, (int(c * SQUARE_SIZE + SQUARE_SIZE / 2), HEIGHT - int(r * SQUARE_SIZE + SQUARE_SIZE / 2)), RADIUS)
                 elif self.board[c][r] == COMPUTER_PIECE:
-                    pygame.draw.circle(wind, STEELBLUE, (int(c*SQUARE_SIZE+SQUARE_SIZE/2), HEIGHT-int(r*SQUARE_SIZE+SQUARE_SIZE/2)), RADIUS)
+                    pygame.draw.circle(wind, STEELBLUE, (int(c * SQUARE_SIZE + SQUARE_SIZE / 2), HEIGHT - int(r * SQUARE_SIZE + SQUARE_SIZE / 2)), RADIUS)
 
     def is_winner(self):
         return self.checkWin(COMPUTER_PIECE) or self.checkWin(PLAYER_PIECE)
@@ -165,19 +165,19 @@ class Board:
         print(top)
         print(" ")
 
-    def successors(self,piece):     # board é o tabuleiro atual sem a jogada resultante do computador
-        successors = []             # guardar todos os successores do nó atual
+    def successors(self, piece):     # board é o tabuleiro atual sem a jogada resultante do computador
+        successors = []              # guardar todos os successores do nó atual
         for col in range(COLS):
             newboard = Board()
             newboard.board = copy.deepcopy(self.board)
             row = self.count_pieces(col)       # contar a quantidade de espaços ocupados em cada coluna do tabuleiro (i) e colocamos a peça na linha correspondente a esse valor
             if row != ROWS:                    # só se coloca um peça nessa coluna se a mesma não estiver totalmente ocupada
-                self.visit +=1
+                self.visit += 1
                 newboard.board[col][row] = piece
-                successors.append((col,newboard))
+                successors.append((col, newboard))
                 if newboard.checkWin(piece):
                     list = []
-                    list.append((col,newboard))
+                    list.append((col, newboard))
                     return list
         return successors
 
