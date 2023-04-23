@@ -103,6 +103,7 @@ class Node:
         if successors:
             for col, move in successors:
                 move.set_turn()
+                move.moves += 1
                 child = Node(move, self)
                 child.column_used = col
                 self.children.append(child)
@@ -112,66 +113,93 @@ class Node:
         self.wins += result
 
     def is_leaf(self):
-        return len(self.children) == 0
+        if self.board.moves == 42 or self.board.is_winner():
+            return True
+        else:
+            return len(self.children) == 0
 
     def has_parent(self):
         return self.parent is not None
+    
+    def is_fully_expanded(self):
+        possible_moves = self.board.successors(self.board.turn)
+        return len(self.children) == len(possible_moves)
 
     def select_child(self):
-        best_child = None
         best_value = -math.inf
+        best_children = []
+        unvisited_children = []
         for child in self.children:
             if child.visits == 0 or self.visits <= 0:
-                score = float('inf')
+                unvisited_children.append(child)
             else:
                 exploit = child.wins / child.visits
-                explore = C * math.sqrt(math.log(self.visits) / child.visits)
+                explore = C * math.sqrt((2 * math.log(self.visits + 1) ) / child.visits)
                 score = exploit + explore
-            if score > best_value:
-                best_value = score
-                best_child = child
-        return best_child
-
-    def simulation(self):
-        possivel_moves = self.board.successors(self.board.turn)
-        if len(possivel_moves) == 0:
-            return self.board
-        return random.choice(possivel_moves)[1]
+                if score == best_value:
+                    best_children.append(child)
+                if score > best_value:
+                    best_value = score
+                    best_children = [child]
+            if len (unvisited_children) > 0:
+                return random.choice(unvisited_children)
+        return random.choice(best_children)
+    
+def simulation(node):
+    if node.moves != 42 or  not node.is_winner():
+        possivel_moves = node.successors(node.turn)
+        return evaluate(random.choice(possivel_moves)[1])
 
 def evaluate(board):
     if board.checkWin(COMPUTER_PIECE):
-        return -1
-    elif board.checkWin(PLAYER_PIECE):
-        return  1
+        return 1
     else:
-        return 0
+        return -1
 
 
-def monte_carlos_tree_search(board, T):
+def monte_carlos_tree_search(board, T, num_threads = os.cpu_count()):
     root = Node(board)
     ti = time()
     tf = time()
-    while tf - ti < 0.00001:
-        node = root
-        s = copy.deepcopy(board)
-        while not node.is_leaf():
-            node = node.select_child()
+    with ThreadPoolExecutor(max_workers = num_threads) as executor:
+        while tf - ti < T:
+            node = root
 
-        node.expand_node(node.board.turn)
-        node = node.select_child()
-        while node is not None:
-            s = node.simulation()
-        result = evaluate(s)
+            while not node.is_leaf():
+                node = node.select_child()
 
-        while node.has_parent():
-            node.update(result)
-            node = node.parent
+            if not node.is_fully_expanded():
+                node.expand_node(node.board.turn)
+                new_node = random.choice(node.children)
+            else:
+                new_node = node.select_child()
+             
+            futures = []
+            possible_moves = new_node.board.successors(new_node.board.turn)
+            for (col, move) in possible_moves:
+                futures.append(executor.submit(simulation, move))
+
+            results = [f.result() for f in futures if f.result() is not None]
+            if results:
+                result = sum(results) / len(results)
+            else:
+                result = 0
+
+            while node.has_parent():
+                node.update(result)
+                node = node.parent
+
+            tf = time()
 
     best_score = float('-inf')
     best_move = 0
     for child in root.children:
-        score = child.wins / child.visits
-        if score >= best_score:
+        if child.visits == 0:
+            score = 0
+        else:
+            score = child.wins / child.visits
+        print(score)
+        if score > best_score:
             best_score = score
             best_move = child.column_used
     return best_move

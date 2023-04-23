@@ -24,8 +24,10 @@ def humam_output(event, label, board, WINDOW, FONT):
         pygame.draw.circle(WINDOW, board.color, (posx, int(SQUARE_SIZE / 2)), RADIUS)
         if board.checkWin(board.turn):
             label = FONT.render(board.label, 1, board.color)
-            return False, label
-    return True, label
+            return False, label, True
+    else:
+        return True, label, False
+    return True, label, True
 
 
 def main():
@@ -76,15 +78,18 @@ def main():
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     pygame.draw.rect(WINDOW, SNOW, (0, 0, WIDTH, SQUARE_SIZE))
                     if board.turn == PLAYER_PIECE:
-                        game, label = humam_output(event, label, board, WINDOW, FONT)
-                        board.printBoard()
-                        board.set_turn()
-                        board.moves += 1
+                        game, label, play = humam_output(event, label, board, WINDOW, FONT)
+                        if play:
+                            board.printBoard()
+                            board.set_turn()
+                            board.moves += 1
                     else:
-                        game, label = humam_output(event, label, board, WINDOW, FONT)
-                        board.printBoard()
-                        board.set_turn()
-                        board.moves += 1
+                        game, label, play= humam_output(event, label, board, WINDOW, FONT)
+                        if play:
+                            board.printBoard()
+                            board.set_turn()
+                            board.moves += 1
+
             board.draw(WINDOW)
             pygame.display.update()
             if label != None:
@@ -103,7 +108,7 @@ def main():
                     print("Player ", board.turn, " wins !")
                 else:
                     print("Tie !")
-                pygame.time.wait(10000)
+                pygame.time.wait(CLOSE_TIME)
         pygame.quit()
 
     elif type == 2 and method == 1:
@@ -120,15 +125,15 @@ def main():
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     pygame.draw.rect(WINDOW, SNOW, (0, 0, WIDTH, SQUARE_SIZE))
                     if board.turn == PLAYER_PIECE:
-                        game, label = humam_output(event, label, board, WINDOW,FONT)
-                        board.printBoard()
-                        board.draw(WINDOW)
-                        pygame.display.update()
-                        board.set_turn()
-                        board.moves += 1
+                        game, label, play= humam_output(event, label, board, WINDOW,FONT)
+                        if play:
+                            board.printBoard()
+                            board.draw(WINDOW)
+                            pygame.display.update()
+                            board.set_turn()
+                            board.moves += 1
 
             if board.turn == COMPUTER_PIECE and game != False:
-                start = time.time()
                 _, cols ,_ = minimax(board, MAX_DEPTH, True)
                 best_col = random.choice(cols)
                 row = board.count_pieces(best_col)
@@ -139,6 +144,7 @@ def main():
                 board.printBoard()
                 board.set_turn()
                 board.moves += 1
+            
             board.draw(WINDOW)
             pygame.display.update()
             if label != None:
@@ -160,7 +166,7 @@ def main():
                 print()
                 end = time.time()
                 print("nodes generated: ", board.visit)
-                pygame.time.wait(10000)
+                pygame.time.wait(CLOSE_TIME)
         pygame.quit()
 
     elif type == 2 and method == 2:
@@ -177,12 +183,13 @@ def main():
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     pygame.draw.rect(WINDOW, SNOW, (0, 0, WIDTH, SQUARE_SIZE))
                     if board.turn == PLAYER_PIECE:
-                        game, label = humam_output(event, label,board, WINDOW, FONT)
-                        board.printBoard()
-                        board.draw(WINDOW)
-                        pygame.display.update()
-                        board.set_turn()
-                        board.moves += 1
+                        game, label, play = humam_output(event, label,board, WINDOW, FONT)
+                        if play:
+                            board.printBoard()
+                            board.draw(WINDOW)
+                            pygame.display.update()
+                            board.set_turn()
+                            board.moves += 1
 
             if board.turn == COMPUTER_PIECE and game != False:
                 _, cols ,_ = alphabeta(board, MAX_DEPTH, -math.inf, math.inf, True)
@@ -216,7 +223,7 @@ def main():
                     print("Tie !")
                 print()
                 print("nodes generated: ", board.visit)
-                pygame.time.wait(10000)
+                pygame.time.wait(CLOSE_TIME)
         pygame.quit()
 
     elif type == 2 and method == 3:
@@ -237,12 +244,13 @@ def main():
                         col = int(math.floor(posx / SQUARE_SIZE))
                         row = board.count_pieces(col)
                         if row < ROWS:
-                            game, label = humam_output(event, label, board, WINDOW, FONT)
-                            board.printBoard()
-                            board.draw(WINDOW)
-                            pygame.display.update()
-                            board.turn = COMPUTER_PIECE
-                            board.set_label_color()
+                            game, label, play = humam_output(event, label, board, WINDOW, FONT)
+                            if play:
+                                board.printBoard()
+                                board.draw(WINDOW)
+                                pygame.display.update()
+                                board.turn = COMPUTER_PIECE
+                                board.set_label_color()
 
             if board.turn == COMPUTER_PIECE and game != False:
                 best_col = monte_carlos_tree_search(board, TIME)
@@ -270,7 +278,7 @@ def main():
                 else:
                     print("Tie !")
                 # print("nodes generated: ", board.visit)
-                pygame.time.wait(10000)
+                pygame.time.wait(CLOSE_TIME)
         pygame.quit()
 
 main()
