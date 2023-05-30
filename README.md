@@ -7,9 +7,9 @@
 Este é o repositório do Trabalho 2 da disciplina de Inteligência Artificial, que consiste na implementação do jogo dos 4 em Linha com uma inteligência artificial para jogar contra o jogador humano.
 <br/>
 Realizado por:
-- Beatriz Marques de Sá
-- Marisa Peniche Salvador Azevedo
-- Marta Luísa Monteiro Pereira
+- Beatriz Sá
+- Marisa Azevedo
+- Marta Pereira
 
 <br/><br/>
 
